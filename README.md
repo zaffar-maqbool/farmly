@@ -1,56 +1,44 @@
-<div align="center">
-  
-  ![GitHub repo size](https://img.shields.io/github/repo-size/codewithsadee/tourly)
-  ![GitHub stars](https://img.shields.io/github/stars/codewithsadee/tourly?style=social)
-  ![GitHub forks](https://img.shields.io/github/forks/codewithsadee/tourly?style=social)
+# Anon - An eCommerce Website
+
+![GitHub repo size](https://img.shields.io/github/repo-size/codewithsadee/anon-ecommerce-website)
+![GitHub stars](https://img.shields.io/github/stars/codewithsadee/anon-ecommerce-website?style=social)
+![GitHub forks](https://img.shields.io/github/forks/codewithsadee/anon-ecommerce-website?style=social)
 [![Twitter Follow](https://img.shields.io/twitter/follow/codewithsadee_?style=social)](https://twitter.com/intent/follow?screen_name=codewithsadee_)
-  [![YouTube Video Views](https://img.shields.io/youtube/views/FYFmQEpZywc?style=social)](https://youtu.be/FYFmQEpZywc)
+[![YouTube Video Views](https://img.shields.io/youtube/views/3l8Lob4ysI0?style=social)](https://youtu.be/3l8Lob4ysI0)
 
-  <br />
-  <br />
-  
-  <img src="./readme-images/project-logo.png" />
+Anon is a fully responsive ecommerce website, maximum compatiblities in all mobile devices, built using HTML, CSS, and JavaScript.
 
-  <h2 align="center">Tourly - Travel website</h2>
+## Demo
 
-  Tourly is fully responsive travel website, <br />Responsive for all devices, built using HTML, CSS, and JavaScript.
+![Anon Desktop Demo](./website-demo-image/desktop.png "Desktop Demo")
+![Anon Mobile Demo](./website-demo-image/mobile.png "Mobile Demo")
 
-  <a href="https://codewithsadee.github.io/tourly/"><strong>➥ Live Demo</strong></a>
-
-</div>
-
-<br />
-
-### Demo Screeshots
-
-![Tourly Desktop Demo](./readme-images/desktop.png "Desktop Demo")
-
-### Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
 
 * [Git](https://git-scm.com/downloads "Download Git") must be installed on your operating system.
 
-### Run Locally
+## Installing Anon
 
-To run **Tourly** locally, run this command on your git bash:
+To install **Anon**, follow these steps:
 
 Linux and macOS:
 
 ```bash
-sudo git clone https://github.com/codewithsadee/tourly.git
+sudo git clone https://github.com/codewithsadee/anon-ecommerce-website.git
 ```
 
 Windows:
 
 ```bash
-git clone https://github.com/codewithsadee/tourly.git
+git clone https://github.com/codewithsadee/anon-ecommerce-website.git
 ```
 
-### Contact
+## Contact
 
-If you want to contact with me you can reach me at [Twitter](https://www.twitter.com/codewithsadee).
+If you want to contact me you can reach me at [Twitter](https://www.twitter.com/codewithsadee).
 
-### License
+## License
 
 This project is **free to use** and does not contains any license.
