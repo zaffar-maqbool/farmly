@@ -26,3 +26,12 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 
 # Verify Docker installation by running hello-world image
 sudo docker run hello-world
+#Add Jenkins User to Docker Group
+sudo usermod -aG docker jenkins
+#Then restart the Jenkins service:
+sudo systemctl restart jenkins
+#Adjust Docker Socket Permissions
+sudo chmod 666 /var/run/docker.sock
+#Verify Docker Installation and Permissions
+sudo su - jenkins
+docker ps -a
