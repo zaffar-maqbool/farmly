@@ -1,4 +1,8 @@
 #!/bin/bash
+#Installation of Java
+
+sudo apt update
+sudo apt install fontconfig openjdk-17-jre
 
 # Install Jenkins
 sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
@@ -25,7 +29,7 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose
 
 # Verify Docker installation by running hello-world image
-sudo docker run hello-world
+sudo docker run -d  hello-world
 #Add Jenkins User to Docker Group
 sudo usermod -aG docker jenkins
 #Then restart the Jenkins service:
