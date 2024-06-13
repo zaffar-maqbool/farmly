@@ -3,8 +3,10 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "zaffarwani/farmly:v1"
-        OLD_CONTAINER = "farmly-container-old"
-        NEW_CONTAINER = "farmly-container"
+        NEW_CONTAINER_LABEL = "new_farmly_container"
+        CURRENT_CONTAINER_LABEL = "current_farmly_container"
+        OLD_CONTAINER_LABEL = "old_farmly_container"
+        FINAL_PORT = "80"
     }
 
     stages {
@@ -24,34 +26,52 @@ pipeline {
             }
         }
 
-        stage('Deploy New Container') {
+        stage('Deploy New Container with Label') {
             steps {
                 script {
-                    // Check if old container is running
-                    def oldRunning = sh(script: "docker ps --filter name=${NEW_CONTAINER} --format '{{.Names}}'", returnStdout: true).trim()
-                    
-                    if (oldRunning) {
-                        // Rename old container
-                        sh "docker rename ${NEW_CONTAINER} ${OLD_CONTAINER}"
-                    }
-
-                    // Start new container
-                    sh "docker run -d -p 80:80 --name ${NEW_CONTAINER} ${DOCKER_IMAGE}"
+                    // Start the new container with a temporary label
+                    sh """
+                        docker run -d -p ${FINAL_PORT}:80 --label ${NEW_CONTAINER_LABEL} ${DOCKER_IMAGE}
+                    """
                 }
             }
         }
 
-        stage('Cleanup Old Container') {
+        stage('Switch Labels') {
             steps {
                 script {
-                    // Stop and remove the old container if it exists
-                    def oldExists = sh(script: "docker ps -a --filter name=${OLD_CONTAINER} --format '{{.Names}}'", returnStdout: true).trim()
-                    
-                    if (oldExists) {
-                        sh "docker stop ${OLD_CONTAINER}"
-                        sh "docker rm ${OLD_CONTAINER}"
+                    // Verify the new container is running
+                    def newRunning = sh(script: "docker ps --filter label=${NEW_CONTAINER_LABEL} --format '{{.ID}}'", returnStdout: true).trim()
+
+                    if (newRunning) {
+                        // Stop and remove the current container
+                        sh """
+                            docker ps -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
+                            docker ps -a -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                        """
+
+                        // Relabel the new container to current
+                        sh """
+                            docker ps -a -q --filter label=${NEW_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
+                            docker ps -a -q --filter label=${NEW_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                            docker run -d -p ${FINAL_PORT}:80 --label ${CURRENT_CONTAINER_LABEL} ${DOCKER_IMAGE}
+                        """
+                    } else {
+                        error "New container failed to start"
                     }
                 }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up any containers with the old label
+            script {
+                sh """
+                    docker ps -a -q --filter label=${OLD_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
+                    docker ps -a -q --filter label=${OLD_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                """
             }
         }
     }
