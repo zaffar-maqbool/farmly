@@ -1,7 +1,12 @@
-### Installation of Java
-
+### Installation 
 ```bash
-Installation of Java
+IF you want to use the sh file
+Make install.sh file Executable
+chmod +x install.sh
+sudo ./install.sh
+
+
+#Installation of Java
 
 sudo apt update
 sudo apt install fontconfig openjdk-17-jre
@@ -58,3 +63,13 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 
 3. Verify that the Docker Engine installation is successful by running the hello-world image.
 sudo docker run hello-world
+
+Add Jenkins User to Docker Group
+sudo usermod -aG docker jenkins
+Then restart the Jenkins service:
+sudo systemctl restart jenkins
+Adjust Docker Socket Permissions
+sudo chmod 666 /var/run/docker.sock
+Verify Docker Installation and Permissions
+sudo su - jenkins
+docker ps
