@@ -3,6 +3,7 @@ Installation of Java
 sudo apt update
 
 sudo apt install fontconfig openjdk-17-jre
+
 java -version
 openjdk version "17.0.8" 2023-07-18
 OpenJDK Runtime Environment (build 17.0.8+7-Debian-1deb12u1)
