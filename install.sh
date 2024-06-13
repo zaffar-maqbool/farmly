@@ -38,4 +38,4 @@ sudo systemctl restart jenkins
 sudo chmod 666 /var/run/docker.sock
 #Verify Docker Installation and Permissions
 sudo su - jenkins
-docker ps
+
