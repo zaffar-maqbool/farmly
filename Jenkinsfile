@@ -26,39 +26,25 @@ pipeline {
             }
         }
 
-        stage('Deploy New Container with Label') {
+        stage('Stop Current Container') {
             steps {
                 script {
-                    // Start the new container with a temporary label
+                    // Stop and remove the current container
                     sh """
-                        docker run -d -p ${FINAL_PORT}:80 --label ${NEW_CONTAINER_LABEL} ${DOCKER_IMAGE}
+                        docker ps -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
+                        docker ps -a -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
                     """
                 }
             }
         }
 
-        stage('Switch Labels') {
+        stage('Deploy New Container') {
             steps {
                 script {
-                    // Verify the new container is running
-                    def newRunning = sh(script: "docker ps --filter label=${NEW_CONTAINER_LABEL} --format '{{.ID}}'", returnStdout: true).trim()
-
-                    if (newRunning) {
-                        // Stop and remove the current container
-                        sh """
-                            docker ps -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
-                            docker ps -a -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
-                        """
-
-                        // Relabel the new container to current
-                        sh """
-                            docker ps -a -q --filter label=${NEW_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
-                            docker ps -a -q --filter label=${NEW_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
-                            docker run -d -p ${FINAL_PORT}:80 --label ${CURRENT_CONTAINER_LABEL} ${DOCKER_IMAGE}
-                        """
-                    } else {
-                        error "New container failed to start"
-                    }
+                    // Start the new container with the final label
+                    sh """
+                        docker run -d -p ${FINAL_PORT}:80 --label ${CURRENT_CONTAINER_LABEL} ${DOCKER_IMAGE}
+                    """
                 }
             }
         }
