@@ -21,4 +21,14 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            // Clean up Docker containers
+            script {
+                sh 'docker stop farmly-container || true'
+                sh 'docker rm farmly-container || true'
+                sh 'docker rmi ' + DOCKER_IMAGE + ' || true'
+            }
+        }
+    }
 }
