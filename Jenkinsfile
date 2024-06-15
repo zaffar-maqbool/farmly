@@ -25,6 +25,7 @@ pipeline {
                     sh """
                         docker build -t farmly-test -f Dockerfile.test .
                         docker run --rm farmly-test
+                        docker run --rm farmly-test || true
                     """
                 }
             }
