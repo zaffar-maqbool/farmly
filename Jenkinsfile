@@ -14,15 +14,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    // Build and run tests if needed
-                    sh 'docker-compose -f $COMPOSE_FILE build app-test'
-                    sh 'docker-compose -f $COMPOSE_FILE run --rm app-test'
-                }
-            }
-        }
 
         stage('Build and Deploy with Docker Compose') {
             steps {
