@@ -14,6 +14,14 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image using the Dockerfile
+                    sh 'docker build -t zaffarwani/farmly:v1 .'
+                }
+            }
+        }
 
         stage('Build and Deploy with Docker Compose') {
             steps {
