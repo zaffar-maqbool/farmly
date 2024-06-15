@@ -36,7 +36,7 @@ pipeline {
                 script {
                     // Stop and remove old containers
                     sh """
-                        docker-compose down
+                        docker-compose down || true
                     """
 
                     // Build and start the containers using Docker Compose
@@ -53,7 +53,7 @@ pipeline {
             // Clean up any stopped containers
             script {
                 sh """
-                    docker-compose down --remove-orphans
+                    docker-compose down --remove-orphans || true
                 """
             }
         }
