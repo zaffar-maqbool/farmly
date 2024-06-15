@@ -2,11 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "zaffarwani/farmly:v1"
-        NEW_CONTAINER_LABEL = "new_farmly_container"
-        CURRENT_CONTAINER_LABEL = "current_farmly_container"
-        OLD_CONTAINER_LABEL = "old_farmly_container"
-        FINAL_PORT = "80"
+        COMPOSE_FILE = 'docker-compose.yml'
     }
 
     stages {
@@ -20,14 +16,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
-                        // Build and run the test Docker container
-                        sh """
-                            docker build -t farmly-test -f Dockerfile.test .
-                            docker run --rm farmly-test
-                        """
-                    }
+                script {
+                    // Build and run tests if needed
+                    sh 'docker-compose -f $COMPOSE_FILE build app-test'
+                    sh 'docker-compose -f $COMPOSE_FILE run --rm app-test'
                 }
             }
         }
@@ -35,26 +27,9 @@ pipeline {
         stage('Build and Deploy with Docker Compose') {
             steps {
                 script {
-                    // Stop and remove old containers
-                    sh """
-                        docker-compose down || true
-                    """
-
-                    // Build and start the containers using Docker Compose
-                    sh """
-                        docker-compose up -d --build
-                    """
-                }
-            }
-        }
-
-        stage('Scale Services') {
-            steps {
-                script {
-                    // Scale the web service to 3 instances
-                    sh """
-                        docker-compose up -d --scale web=3
-                    """
+                    // Pull the latest image and deploy using docker-compose
+                    sh "docker-compose -f $COMPOSE_FILE pull"
+                    sh "docker-compose -f $COMPOSE_FILE up -d --build"
                 }
             }
         }
@@ -62,11 +37,9 @@ pipeline {
 
     post {
         always {
-            // Clean up any stopped containers
+            // Clean up unused resources if necessary
             script {
-                sh """
-                    docker-compose down --remove-orphans || true
-                """
+                sh "docker-compose -f $COMPOSE_FILE down --remove-orphans"
             }
         }
     }
