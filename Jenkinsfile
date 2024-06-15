@@ -24,8 +24,8 @@ pipeline {
                     // Build and run the test Docker container
                     sh """
                         docker build -t farmly-test -f Dockerfile.test .
-                        docker run --rm farmly-test
-                        docker run --rm farmly-test || true
+                        
+                        docker run --rm farmly-test 
                     """
                 }
             }
