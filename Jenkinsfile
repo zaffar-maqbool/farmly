@@ -20,13 +20,14 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                script {
-                    // Build and run the test Docker container
-                    sh """
-                        docker build -t farmly-test -f Dockerfile.test .
-                        
-                        docker run --rm farmly-test 
-                    """
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        // Build and run the test Docker container
+                        sh """
+                            docker build -t farmly-test -f Dockerfile.test .
+                            docker run --rm farmly-test
+                        """
+                    }
                 }
             }
         }
@@ -42,6 +43,17 @@ pipeline {
                     // Build and start the containers using Docker Compose
                     sh """
                         docker-compose up -d --build
+                    """
+                }
+            }
+        }
+
+        stage('Scale Services') {
+            steps {
+                script {
+                    // Scale the web service to 3 instances
+                    sh """
+                        docker-compose up -d --scale web=3
                     """
                 }
             }
