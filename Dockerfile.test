@@ -1,0 +1,14 @@
+# Use a Node.js image as a base to install linters and other tools
+FROM node:alpine
+
+# Install necessary tools
+RUN npm install -g htmlhint csslint eslint
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Copy the contents of the local directory to the container
+COPY . .
+
+# Command to run linters
+CMD ["sh", "-c", "htmlhint . && csslint . && eslint ."]

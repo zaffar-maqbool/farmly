@@ -18,32 +18,29 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Run Tests') {
             steps {
                 script {
-                    docker.build(DOCKER_IMAGE)
-                }
-            }
-        }
-
-        stage('Stop Current Container') {
-            steps {
-                script {
-                    // Stop and remove the current container
+                    // Build and run the test Docker container
                     sh """
-                        docker ps -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
-                        docker ps -a -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                        docker build -t farmly-test -f Dockerfile.test .
+                        docker run --rm farmly-test
                     """
                 }
             }
         }
 
-        stage('Deploy New Container') {
+        stage('Build and Deploy with Docker Compose') {
             steps {
                 script {
-                    // Start the new container with the final label
+                    // Stop and remove old containers
                     sh """
-                        docker run -d -p ${FINAL_PORT}:80 --label ${CURRENT_CONTAINER_LABEL} ${DOCKER_IMAGE}
+                        docker-compose down
+                    """
+
+                    // Build and start the containers using Docker Compose
+                    sh """
+                        docker-compose up -d --build
                     """
                 }
             }
@@ -52,11 +49,10 @@ pipeline {
 
     post {
         always {
-            // Clean up any containers with the old label
+            // Clean up any stopped containers
             script {
                 sh """
-                    docker ps -a -q --filter label=${OLD_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
-                    docker ps -a -q --filter label=${OLD_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                    docker-compose down --remove-orphans
                 """
             }
         }
