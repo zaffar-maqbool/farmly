@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     environment {
-        COMPOSE_FILE = 'docker-compose.yml'
+        DOCKER_IMAGE = "zaffarwani/farmly:v1"
+        NEW_CONTAINER_LABEL = "new_farmly_container"
+        CURRENT_CONTAINER_LABEL = "current_farmly_container"
+        OLD_CONTAINER_LABEL = "old_farmly_container"
+        FINAL_PORT = "80"
     }
 
     stages {
@@ -14,11 +18,33 @@ pipeline {
             }
         }
 
-        stage('Build and Deploy with Docker Compose') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Deploy using docker-compose
-                    sh "docker-compose -f $COMPOSE_FILE up -d"
+                    docker.build(DOCKER_IMAGE)
+                }
+            }
+        }
+
+        stage('Stop Current Container') {
+            steps {
+                script {
+                    // Stop and remove the current container
+                    sh """
+                        docker ps -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
+                        docker ps -a -q --filter label=${CURRENT_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                    """
+                }
+            }
+        }
+
+        stage('Deploy New Container') {
+            steps {
+                script {
+                    // Start the new container with the final label
+                    sh """
+                        docker run -d -p ${FINAL_PORT}:80 --label ${CURRENT_CONTAINER_LABEL} ${DOCKER_IMAGE}
+                    """
                 }
             }
         }
@@ -26,9 +52,12 @@ pipeline {
 
     post {
         always {
-            // Clean up unused resources if necessary
+            // Clean up any containers with the old label
             script {
-                sh "docker-compose -f $COMPOSE_FILE down --remove-orphans"
+                sh """
+                    docker ps -a -q --filter label=${OLD_CONTAINER_LABEL} | xargs --no-run-if-empty docker stop
+                    docker ps -a -q --filter label=${OLD_CONTAINER_LABEL} | xargs --no-run-if-empty docker rm
+                """
             }
         }
     }

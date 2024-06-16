@@ -27,7 +27,7 @@ sudo apt-get update
 
 # Install Docker packages
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose
-sudo apt-get install docker-compose-plugin
+
 # Verify Docker installation by running hello-world image
 sudo docker run -d  hello-world
 #Add Jenkins User to Docker Group
