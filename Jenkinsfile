@@ -51,7 +51,7 @@ pipeline {
         }
     }
 
-    // Optionally, you can comment out or remove the post section for Slack notifications
+    // Optionally, you can add a post section for Slack notifications here if needed
 
     // post {
     //     always {
