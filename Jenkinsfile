@@ -11,7 +11,6 @@ pipeline {
         stage('Verify Docker Access') {
             steps {
                 script {
-                    // Verify Docker access
                     sh 'docker ps'
                 }
             }
@@ -20,7 +19,6 @@ pipeline {
         stage('Build and Deploy with Docker Compose') {
             steps {
                 script {
-                    // Deploy using docker-compose
                     sh "docker-compose -f $COMPOSE_FILE up -d --build"
                 }
             }
@@ -29,11 +27,11 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Run SonarQube scanner from within the Jenkins agent
-                    sh "docker run --rm \
-                        -e SONAR_HOST_URL=$SONARQUBE_ENV \
-                        -v $(pwd):/usr/src \
-                        sonarsource/sonar-scanner-cli"
+                    // Use single quotes for docker run command to avoid Groovy variable substitution
+                    sh 'docker run --rm ' +
+                       "-e SONAR_HOST_URL=$SONARQUBE_ENV " +
+                       '-v $(pwd):/usr/src ' +
+                       'sonarsource/sonar-scanner-cli'
                 }
             }
         }
