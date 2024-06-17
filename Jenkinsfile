@@ -24,4 +24,22 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            script {
+                slackSend (color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}")
+            }
+        }
+        success {
+            script {
+                slackSend (color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.")
+            }
+        }
+        failure {
+            script {
+                slackSend (color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.")
+            }
+        }
+    }
+}
 }
