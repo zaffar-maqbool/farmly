@@ -9,6 +9,7 @@ pipeline {
         stage('Verify Docker Access') {
             steps {
                 script {
+                    // Verify Docker access
                     sh 'docker ps'
                 }
             }
@@ -20,15 +21,6 @@ pipeline {
                     // Deploy using docker-compose
                     sh "docker-compose -f $COMPOSE_FILE up -d --build"
                 }
-            }
-        }
-    }
-
-    post {
-        always {
-            // Clean up unused resources if necessary
-            script {
-                sh "docker-compose -f $COMPOSE_FILE down --remove-orphans"
             }
         }
     }
