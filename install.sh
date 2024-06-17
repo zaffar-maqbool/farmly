@@ -39,5 +39,5 @@ sudo chmod 666 /var/run/docker.sock
 #Verify Docker Installation and Permissions
 sudo su - jenkins
 
-
+docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 
