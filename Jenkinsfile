@@ -51,23 +51,24 @@ pipeline {
         }
     }
 
-    // Optionally, you can add a post section for Slack notifications here if needed
-
-    // post {
-    //     always {
-    //         script {
-    //             slackSend(color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: SLACK_CREDENTIALS)
-    //         }
-    //     }
-    //     success {
-    //         script {
-    //             slackSend(color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: SLACK_CREDENTIALS)
-    //         }
-    //     }
-    //     failure {
-    //         script {
-    //             slackSend(color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: SLACK_CREDENTIALS)
-    //         }
-    //     }
-    // }
+    post {
+        always {
+            script {
+                // Optional: Slack notification
+                // slackSend(color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: SLACK_CREDENTIALS)
+            }
+        }
+        success {
+            script {
+                // Optional: Slack notification
+                // slackSend(color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: SLACK_CREDENTIALS)
+            }
+        }
+        failure {
+            script {
+                // Optional: Slack notification
+                // slackSend(color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: SLACK_CREDENTIALS)
+            }
+        }
+    }
 }
