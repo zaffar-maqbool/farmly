@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     // Deploy using docker-compose
-                    sh "docker-compose -f $COMPOSE_FILE up -d"
+                    sh "docker-compose -f $COMPOSE_FILE up -d --build"
                 }
             }
         }
