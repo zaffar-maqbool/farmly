@@ -1,15 +1,9 @@
 pipeline {
-    agent {
-        docker {
-            image 'your_jenkins_agent_image_with_docker' // Replace with your Jenkins agent image that has Docker
-            args '-v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
-        }
-    }
+    agent any
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        SONARQUBE_CONTAINER = '520439cf7098'  // Replace with your SonarQube container name or ID
-        SONARQUBE_URL = "http://${SONARQUBE_CONTAINER}:9000"  // Assuming SonarQube runs on port 9000 inside the container
+        SONARQUBE_ENV = 'http://3.86.237.201:9000'  // Update with your SonarQube server URL
         SLACK_CREDENTIALS = 'slackwebhook'  // Update with your Slack credential ID
     }
 
@@ -35,11 +29,11 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Run SonarQube scanner from Jenkins agent
-                    docker.image('your_sonarqube_scanner_image')
-                        .inside("--network=host") {  // Use host network mode to access SonarQube container
-                            sh "sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=your_sonarqube_token"
-                        }
+                    // Run SonarQube scanner from within the Jenkins agent
+                    sh "docker run --rm \
+                        -e SONAR_HOST_URL=$SONARQUBE_ENV \
+                        -v $(pwd):/usr/src \
+                        sonarsource/sonar-scanner-cli"
                 }
             }
         }
@@ -61,17 +55,17 @@ pipeline {
     post {
         always {
             script {
-                slackSend(color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: env.SLACK_CREDENTIALS)
+                slackSend(color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: SLACK_CREDENTIALS)
             }
         }
         success {
             script {
-                slackSend(color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: env.SLACK_CREDENTIALS)
+                slackSend(color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: SLACK_CREDENTIALS)
             }
         }
         failure {
             script {
-                slackSend(color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: env.SLACK_CREDENTIALS)
+                slackSend(color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: SLACK_CREDENTIALS)
             }
         }
     }
