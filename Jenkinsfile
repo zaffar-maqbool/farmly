@@ -1,9 +1,15 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'your_jenkins_agent_image_with_docker' // Replace with your Jenkins agent image that has Docker
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket
+        }
+    }
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        SONARQUBE_ENV = 'http://3.86.237.201:9000'  // Update with your SonarQube server name in Jenkins configuration
+        SONARQUBE_CONTAINER = '520439cf7098'  // Replace with your SonarQube container name or ID
+        SONARQUBE_URL = "http://${SONARQUBE_CONTAINER}:9000"  // Assuming SonarQube runs on port 9000 inside the container
         SLACK_CREDENTIALS = 'slackwebhook'  // Update with your Slack credential ID
     }
 
@@ -29,10 +35,11 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube') { // SonarQube server name in Jenkins configuration
-                        // Run SonarQube Scanner
-                        sh 'sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
-                    }
+                    // Run SonarQube scanner from Jenkins agent
+                    docker.image('your_sonarqube_scanner_image')
+                        .inside("--network=host") {  // Use host network mode to access SonarQube container
+                            sh "sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=your_sonarqube_token"
+                        }
                 }
             }
         }
@@ -40,7 +47,6 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 script {
-                    // Wait for SonarQube analysis to be completed and check Quality Gate status
                     timeout(time: 1, unit: 'HOURS') {
                         def qg = waitForQualityGate()
                         if (qg.status != 'OK') {
@@ -55,17 +61,17 @@ pipeline {
     post {
         always {
             script {
-                slackSend (color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: env.SLACK_CREDENTIALS)
+                slackSend(color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: env.SLACK_CREDENTIALS)
             }
         }
         success {
             script {
-                slackSend (color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: env.SLACK_CREDENTIALS)
+                slackSend(color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: env.SLACK_CREDENTIALS)
             }
         }
         failure {
             script {
-                slackSend (color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: env.SLACK_CREDENTIALS)
+                slackSend(color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: env.SLACK_CREDENTIALS)
             }
         }
     }
