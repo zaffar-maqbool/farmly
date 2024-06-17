@@ -4,7 +4,7 @@ pipeline {
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
         SONARQUBE_ENV = 'http://3.86.237.201:9000'  // Update with your SonarQube server name in Jenkins configuration
-        SLACK_CREDENTIALS = 'https://hooks.slack.com/services/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'  // Update with your Slack credential ID
+        SLACK_CREDENTIALS = 'slackwebhook'  // Update with your Slack credential ID
     }
 
     stages {
