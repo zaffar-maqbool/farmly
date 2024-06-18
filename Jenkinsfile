@@ -29,7 +29,7 @@ pipeline {
     post {
         always {
             //Add channel name
-            slackSend channel: 'channelName',
+            slackSend channel: 'devops',
             message: "Find Status of Pipeline:- ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}"
         }
     }
