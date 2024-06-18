@@ -4,7 +4,7 @@ IF you want to use the sh file
 Make install.sh file Executable
 chmod +x install.sh
 sudo ./install.sh
-
+few more to do
 
 #Installation of Java
 
