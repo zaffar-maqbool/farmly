@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        SLACK_CREDENTIALS = 'slack-webhook'  // Update with your credential ID
+        SLACK_CREDENTIALS = 'slack-jenkins-ci'  // Update with your credential ID
     }
 
     stages {
@@ -28,10 +28,13 @@ pipeline {
 
     post {
         always {
-            //Add channel name
-            slackSend channel: 'devops',
-            message: "Find Status of Pipeline:- ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}"
+            // Send Slack notification after every build
+            slackSend(
+                channel: '#devops',  // Replace with your Slack channel name
+                color: '#FFFF00',  // Yellow color for the message
+                message: "Find Status of Pipeline: ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}",
+                tokenCredentialId: 'slack-webhook'
+            )
         }
     }
 }
-
