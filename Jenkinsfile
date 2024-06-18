@@ -30,7 +30,7 @@ pipeline {
                 dir("${WORKSPACE}") {
                     script {
                         def scannerHome = tool name: 'scanner-name', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        withSonarQubeEnv('SonarQubeScanner') { // Update to match your SonarQube installation name
+                        withSonarQubeEnv('SonarQubeScanner') {
                             sh "${scannerHome}/bin/sonar-scanner \
                                 -D sonar.projectVersion=1.0-SNAPSHOT \
                                 -D sonar.projectKey=webapp-sample \
