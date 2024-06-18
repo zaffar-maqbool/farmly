@@ -1,4 +1,4 @@
-Fpipeline {
+pipeline {
     agent any
 
     environment {
