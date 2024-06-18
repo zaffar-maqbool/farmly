@@ -1,4 +1,4 @@
-pipeline {
+Fpipeline {
     agent any
 
     environment {
@@ -33,7 +33,7 @@ pipeline {
                 channel: '#devops',  // Replace with your Slack channel name
                 color: '#FFFF00',  // Yellow color for the message
                 message: "Find Status of Pipeline: ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}",
-                tokenCredentialId: 'slack-webhook'
+                tokenCredentialId: 'slack-jenkins-ci'
             )
         }
     }
