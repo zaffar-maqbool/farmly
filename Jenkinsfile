@@ -27,20 +27,12 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                slackSend (channel: '#your-channel', color: '#FFFF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' finished with status: ${currentBuild.currentResult}", tokenCredentialId: env.SLACK_CREDENTIALS)
-            }
-        }
         success {
-            script {
-                slackSend (channel: '#your-channel', color: '#00FF00', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded.", tokenCredentialId: env.SLACK_CREDENTIALS)
-            }
+            slackSend(channel: '#your-channel', color: '#00FF00', message: "Build successful", tokenCredentialId: 'slack-webhook')
         }
         failure {
-            script {
-                slackSend (channel: '#your-channel', color: '#FF0000', message: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed.", tokenCredentialId: env.SLACK_CREDENTIALS)
-            }
+            slackSend(channel: '#your-channel', color: '#FF0000', message: "Build failed", tokenCredentialId: 'slack-webhook')
         }
     }
+}
 }
