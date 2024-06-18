@@ -27,11 +27,10 @@ pipeline {
     }
 
     post {
-        success {
-            slackSend(channel: '#your-channel', color: '#00FF00', message: "Build successful", tokenCredentialId: 'slack-webhook')
-        }
-        failure {
-            slackSend(channel: '#your-channel', color: '#FF0000', message: "Build failed", tokenCredentialId: 'slack-webhook')
+        always {
+            //Add channel name
+            slackSend channel: 'channelName',
+            message: "Find Status of Pipeline:- ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}"
         }
     }
 }
