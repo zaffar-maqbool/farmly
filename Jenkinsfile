@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools{
-        java 'jdk17'
+        java 'openjdk-17-jre'
     }
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
