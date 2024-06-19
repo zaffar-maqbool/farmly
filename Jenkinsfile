@@ -25,50 +25,20 @@ pipeline {
             }
         }
 
-        stage('SonarQube Code Analysis') {
-            steps {
-                dir("${WORKSPACE}") {
-                    script {
-                        def scannerHome = tool name: 'scanner-name', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        withSonarQubeEnv('SonarQubeScanner') {
-                            sh "${scannerHome}/bin/sonar-scanner \
-                                -D sonar.projectVersion=1.0-SNAPSHOT \
-                                -D sonar.projectKey=webapp-sample \
-                                -D sonar.sources=. \
-                                -D sonar.language=web \
-                                -D sonar.sourceEncoding=UTF-8 \
-                                -D sonar.host.url=http://3.85.165.27:9000 \
-                                -D sonar.login=${env.SONAR_TOKEN}"
-                        }
-                    }
+     stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
+                    -Dsonar.projectKey=farmy '''
                 }
             }
         }
-
-        stage("SonarQube Quality Gate Check") {
-            steps {
+        stage("quality gate"){
+           steps {
                 script {
-                    def qualityGate = waitForQualityGate()
-
-                    if (qualityGate.status != 'OK') {
-                        error "Quality Gate failed: ${qualityGate.status}"
-                    } else {
-                        echo "SonarQube Quality Gates Passed"
-                    }
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
                 }
-            }
+            } 
         }
-    }
 
-    post {
-        always {
-            // Send Slack notification after every build
-            slackSend(
-                channel: '#devops',
-                color: '#FF0000',
-                message: "Find Status of Pipeline: ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}",
-                tokenCredentialId: 'slack-jenkins-ci'
-            )
-        }
-    }
-}
+
