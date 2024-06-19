@@ -20,25 +20,30 @@ pipeline {
             steps {
                 script {
                     // Deploy using docker-compose
-                    sh "docker-compose -f $COMPOSE_FILE up -d --build --remove-orphans"
+                    sh "docker-compose -f ${env.COMPOSE_FILE} up -d --build --remove-orphans"
                 }
             }
         }
 
-     stage("Sonarqube Analysis "){
-            steps{
+        stage('SonarQube Analysis') {
+            steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
-                    -Dsonar.projectKey=farmy '''
+                    script {
+                        sh '''
+                            $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
+                            -Dsonar.projectKey=farmy
+                        '''
+                    }
                 }
             }
         }
-        stage("quality gate"){
-           steps {
+
+        stage('Quality Gate') {
+            steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: SONARQUBE_CREDENTIALS
                 }
-            } 
+            }
         }
-
-
+    }
+}
