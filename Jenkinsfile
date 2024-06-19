@@ -1,61 +1,59 @@
 pipeline {
     agent any
-
+    tools{
+        jdk 'jdk17'
+    }
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
         SONARQUBE_CREDENTIALS = 'Sonar-token' // Update with your SonarQube credentials ID
-        SCANNER_HOME = tool 'sonar-scanner'
-    }
-
-    tools {
-        // Define JDK tool
-        jdk 'jdk17'
+        SCANNER_HOME=tool 'sonar-scanner'
     }
 
     stages {
-        // Define stages as per your requirement
-    }
+        stage('Verify Docker Access') {
+            steps {
+                script {
+                    // Verify Docker access
+                    sh 'docker ps'
+                }
+            }
+        }
 
-    post {
-        always {
-            // Send Slack notification after every build
-            script {
-                // Define Slack message components
-                def pipelineStatus = currentBuild.currentResult ?: 'UNKNOWN'
-                def jobName = env.JOB_NAME ?: 'Unknown Job'
-                def buildNumber = env.BUILD_NUMBER ?: 'Unknown'
-                def buildUrl = env.BUILD_URL ?: 'Build URL not available'
+        stage('Build and Deploy with Docker Compose') {
+            steps {
+                script {
+                    // Deploy using docker-compose
+                    sh "docker-compose -f ${env.COMPOSE_FILE} up -d --build --remove-orphans"
+                }
+            }
+        }
 
-                // Define Slack message content
-                def slackMessage = """
-                    *Pipeline Status*: ${pipelineStatus}
-                    *Job Name*: ${jobName}
-                    *Build Number*: ${buildNumber}
-                    *Build URL*: ${buildUrl}
-                """
+        stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
+                    -Dsonar.projectKey=farmy '''
+                }
+            }
+        }
 
-                // Send Slack notification
-                slackSend(
-                    channel: '#devops', // Specify your Slack channel
-                    color: getColorForStatus(pipelineStatus), // Use function to determine color based on status
-                    message: slackMessage.trim(), // Trim whitespace from the message
-                    tokenCredentialId: 'slack-jenkins-ci' // Use your credential ID for Slack integration
-                )
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: SONARQUBE_CREDENTIALS
+                }
             }
         }
     }
-}
-
-// Function to determine Slack color based on build status
-def getColorForStatus(String status) {
-    switch (status) {
-        case 'SUCCESS':
-            return 'good' // Green color for success
-        case 'FAILURE':
-            return 'danger' // Red color for failure
-        case 'ABORTED':
-            return 'warning' // Yellow color for aborted
-        default:
-            return '#439FE0' // Blue color for unknown or other statuses
+    post {
+        always {
+            // Send Slack notification after every build
+            slackSend(
+                channel: '#devops',
+                color: '#FF0000',
+                message: "Find Status of Pipeline: ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}",
+                tokenCredentialId: 'slack-jenkins-ci'
+            )
+        }
     }
 }
