@@ -47,13 +47,42 @@ pipeline {
     }
     post {
         always {
+            // Define Slack message components
+            def pipelineStatus = currentBuild.currentResult ?: 'UNKNOWN'
+            def jobName = env.JOB_NAME ?: 'Unknown Job'
+            def buildNumber = env.BUILD_NUMBER ?: 'Unknown'
+            def buildUrl = env.BUILD_URL ?: 'Build URL not available'
+    
+            // Define Slack message content
+            def slackMessage = """
+                *Pipeline Status*: ${pipelineStatus}
+                *Job Name*: ${jobName}
+                *Build Number*: ${buildNumber}
+                *Build URL*: ${buildUrl}
+            """
+    
             // Send Slack notification after every build
             slackSend(
-                channel: '#devops',
-                color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger', // Use Slack color codes for success or failure
-                message: "Pipeline Status: ${currentBuild.currentResult} \nJob Name: ${env.JOB_NAME} \nBuild Number: ${env.BUILD_NUMBER} \nBuild URL: ${BUILD_URL}",
-                tokenCredentialId: 'slack-jenkins-ci'
+                channel: '#devops', // Specify your Slack channel
+                color: getColorForStatus(pipelineStatus), // Use function to determine color based on status
+                message: slackMessage.trim(), // Trim whitespace from the message
+                tokenCredentialId: 'slack-jenkins-ci' // Use your credential ID for Slack integration
             )
         }
     }
+
+    // Function to determine Slack color based on build status
+    def getColorForStatus(String status) {
+        switch (status) {
+            case 'SUCCESS':
+                return 'good' // Green color for success
+            case 'FAILURE':
+                return 'danger' // Red color for failure
+            case 'ABORTED':
+                return 'warning' // Yellow color for aborted
+            default:
+                return '#439FE0' // Blue color for unknown or other statuses
+        }
+    }
+
 }
