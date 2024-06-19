@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        SONARQUBE_CREDENTIALS = 'sonaq-jenkins' // Update with your SonarQube credentials ID
+        //SONARQUBE_CREDENTIALS = 'sonaq-jenkins' // Update with your SonarQube credentials ID
     }
 
     stages {
@@ -41,7 +41,7 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: SONARQUBE_CREDENTIALS
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
                 }
             }
         }
