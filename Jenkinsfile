@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        //SONARQUBE_CREDENTIALS = 'sonaq-jenkins' // Update with your SonarQube credentials ID
+        SONARQUBE_CREDENTIALS = 'Sonar-token' // Update with your SonarQube credentials ID
     }
 
     stages {
@@ -27,10 +27,10 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonar-server') {
+                withSonarQubeEnv('sonar-server') { // Ensure 'sonar-server' matches your SonarQube configuration name
                     script {
                         sh '''
-                            $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
+                            sonar-scanner -Dsonar.projectName=farmy \
                             -Dsonar.projectKey=farmy
                         '''
                     }
@@ -41,7 +41,7 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: SONARQUBE_CREDENTIALS
                 }
             }
         }
