@@ -27,15 +27,11 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar-server') { // Ensure 'sonar-server' matches your SonarQube configuration name
-                    script {
-                        sh '''
-                            sonar-scanner -Dsonar.projectName=farmy \
-                            -Dsonar.projectKey=farmy
-                        '''
-                    }
+        stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
+                    -Dsonar.projectKey=farmy '''
                 }
             }
         }
