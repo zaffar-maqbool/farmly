@@ -6,6 +6,7 @@ pipeline {
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
         SONARQUBE_CREDENTIALS = 'Sonar-token' // Update with your SonarQube credentials ID
+        SCANNER_HOME=tool 'sonar-scanner'
     }
 
     stages {
