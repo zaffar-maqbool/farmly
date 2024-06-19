@@ -1,12 +1,15 @@
 pipeline {
     agent any
-    tools{
-        jdk 'jdk17'
-    }
+
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
         SONARQUBE_CREDENTIALS = 'Sonar-token' // Update with your SonarQube credentials ID
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+
+    tools {
+        // Define JDK tool
+        jdk 'jdk17'
     }
 
     stages {
@@ -14,7 +17,12 @@ pipeline {
             steps {
                 script {
                     // Verify Docker access
-                    sh 'docker ps'
+                    try {
+                        sh 'docker ps'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to execute 'docker ps': ${e.message}")
+                    }
                 }
             }
         }
@@ -23,16 +31,27 @@ pipeline {
             steps {
                 script {
                     // Deploy using docker-compose
-                    sh "docker-compose -f ${env.COMPOSE_FILE} up -d --build --remove-orphans"
+                    try {
+                        sh "docker-compose -f ${env.COMPOSE_FILE} up -d --build --remove-orphans"
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to execute docker-compose: ${e.message}")
+                    }
                 }
             }
         }
 
-        stage("Sonarqube Analysis "){
-            steps{
-                withSonarQubeEnv('sonar-server') {
-                sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=farmy \
-                    -Dsonar.projectKey=farmy '''
+        stage("Sonarqube Analysis") {
+            steps {
+                script {
+                    // Run SonarQube analysis
+                    withSonarQubeEnv('sonar-server') {
+                        sh ''' 
+                            ${SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectName=farmy \
+                            -Dsonar.projectKey=farmy
+                        '''
+                    }
                 }
             }
         }
@@ -40,11 +59,15 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: SONARQUBE_CREDENTIALS
+                    // Wait for SonarQube Quality Gate
+                    timeout(time: 1, unit: 'HOURS') {
+                        waitForQualityGate abortPipeline: true, credentialsId: env.SONARQUBE_CREDENTIALS
+                    }
                 }
             }
         }
     }
+
     post {
         always {
             // Define Slack message components
@@ -52,7 +75,7 @@ pipeline {
             def jobName = env.JOB_NAME ?: 'Unknown Job'
             def buildNumber = env.BUILD_NUMBER ?: 'Unknown'
             def buildUrl = env.BUILD_URL ?: 'Build URL not available'
-    
+
             // Define Slack message content
             def slackMessage = """
                 *Pipeline Status*: ${pipelineStatus}
@@ -60,7 +83,7 @@ pipeline {
                 *Build Number*: ${buildNumber}
                 *Build URL*: ${buildUrl}
             """
-    
+
             // Send Slack notification after every build
             slackSend(
                 channel: '#devops', // Specify your Slack channel
@@ -70,19 +93,18 @@ pipeline {
             )
         }
     }
+}
 
-    // Function to determine Slack color based on build status
-    def getColorForStatus(String status) {
-        switch (status) {
-            case 'SUCCESS':
-                return 'good' // Green color for success
-            case 'FAILURE':
-                return 'danger' // Red color for failure
-            case 'ABORTED':
-                return 'warning' // Yellow color for aborted
-            default:
-                return '#439FE0' // Blue color for unknown or other statuses
-        }
+// Function to determine Slack color based on build status
+def getColorForStatus(String status) {
+    switch (status) {
+        case 'SUCCESS':
+            return 'good' // Green color for success
+        case 'FAILURE':
+            return 'danger' // Red color for failure
+        case 'ABORTED':
+            return 'warning' // Yellow color for aborted
+        default:
+            return '#439FE0' // Blue color for unknown or other statuses
     }
-
 }
