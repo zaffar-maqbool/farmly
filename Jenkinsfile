@@ -50,8 +50,8 @@ pipeline {
             // Send Slack notification after every build
             slackSend(
                 channel: '#devops',
-                color: '#FF0000',
-                message: "Find Status of Pipeline: ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}",
+                color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger', // Use Slack color codes for success or failure
+                message: "Pipeline Status: ${currentBuild.currentResult} \nJob Name: ${env.JOB_NAME} \nBuild Number: ${env.BUILD_NUMBER} \nBuild URL: ${BUILD_URL}",
                 tokenCredentialId: 'slack-jenkins-ci'
             )
         }
