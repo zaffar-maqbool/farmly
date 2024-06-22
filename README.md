@@ -1,5 +1,17 @@
 ### Installation 
 ```bash
+Last project
+https://www.youtube.com/watch?v=Eu-FMqPg-y4&t=1s
+GITHUB
+AWS
+JENKINS
+DOCKER 
+
+UPGRADES
+Docker Compose 
+Slack 
+sonarscanner
+
 IF you want to use the sh file
 Make install.sh file Executable
 chmod +x install.sh
@@ -73,3 +85,58 @@ sudo chmod 666 /var/run/docker.sock
 Verify Docker Installation and Permissions
 sudo su - jenkins
 docker ps
+
+Install Plugins like JDK, Sonarqube Scanner
+Install Plugin
+Go to Manage Jenkins →Plugins → Available Plugins → Install below plugins
+SonarQube Scanner
+Sonar Quality Gates
+Slack Notification
+Docker
+Docker Pipeline
+Eclipse Temurin installer
+
+Installing Sonarque
+docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
+
+Create a Job
+Grab the Public IP Address of your EC2 Instance, Sonarqube works on Port 9000, so :9000.
+Goto your Sonarqube Server.
+Click on Administration → Security → Users → Click on Tokens and Update Token → Give it a name → and click on Generate Token
+copy Token
+Goto Jenkins Dashboard → Manage Jenkins → Credentials → Add Secret Text. It should look like this
+Now, go to Dashboard → Manage Jenkins → System and Add like the below image.
+Click on Apply and Save
+The Configure System option is used in Jenkins to configure different server
+Global Tool Configuration is used to configure different tools that we install using Plugins
+We will install a sonar scanner in the tools.
+In the Sonarqube Dashboard add a quality gate also
+Administration → Configuration →Webhooks
+
+Setting up Slack Incoming Webhooks
+In your Slack workspace, navigate to the Apps section.
+Search for “Incoming Webhooks” and install the app.
+Create a new incoming webhook for the channel where you want to receive Jenkins notifications.
+Copy the generated webhook URL for later use.
+Configuring Jenkins for Slack Integration
+Now that we have the webhook URL, let’s configure Jenkins to send notifications to Slack:
+Integrate Jenkins ci in slack and use those credentials in your jenkins Global credentials (unrestricted) Also in  system config (slack )
+
+Install Slack Plugin:
+Go to your Jenkins dashboard.
+Click on “Manage Jenkins” in the left sidebar.
+Select “Manage Plugins.”
+Navigate to the “Available” tab, search for “Slack Notification Plugin,” and install it.
+In the Jenkins dashboard, go to “Manage Jenkins” > “Manage Credentials.”
+Click on “Global credentials (unrestricted)” and then “Add Credentials.”
+Choose “Secret text” as the kind, enter your Jenkins ci in the “Secret” field, and give it an ID (e.g., `slack-webhook`).
+Click “OK” to save the credentials.
+
+Configure Jenkins Global Settings:
+Go to “Manage Jenkins” > “Configure System.”
+Scroll down to the “Slack” section.
+Add your Slack workspace domain in the “Team Domain” field.
+Under “Integration Token,” choose the credential you created (e.g., slack-webhook) from the dropdown.
+Click “Save” at the bottom of the page
+
+
