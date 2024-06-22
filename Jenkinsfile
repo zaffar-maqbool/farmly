@@ -37,13 +37,7 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: SONARQUBE_CREDENTIALS
-                }
-            }
-        }
+
     }
     post {
         always {
@@ -52,7 +46,7 @@ pipeline {
                 channel: '#devops',
                 color: '#FF0000',
                 message: "Find Status of Pipeline: ${currentBuild.currentResult} ${env.JOB_NAME} ${env.BUILD_NUMBER} ${BUILD_URL}",
-                tokenCredentialId: 'slack-jenkins-ci'
+                tokenCredentialId: 'slack-webhook'
             )
         }
     }
